@@ -1,0 +1,397 @@
+FORMAT: 1A
+HOST: https://bj1.network.api.ustack.com/v2.0/
+
+# GRE 隧道
+GRE 隧道服务的 RESTful API。
+
+GRE 隧道服务有三个核心资源：
+
+ - 隧道
+ - 隧道连接
+ - 目标网络
+
+无论二层还是三层隧道，都属于隧道，只是 typ 字段不同而已。
+资源间的关系请参考 wiki：
+
+<http://wiki.ustack.com/doku.php?id=gre_info_arch>
+
+![gre_tunnel_info_arch](http://mathematrix-wordpress.stor.sinaapp.com/files/GRE_Tunnel_Comp/gre_info_tech.png)
+
+# Group Tunnels
+
+隧道相关的 API
+
+## Tunnels [/tunnels]
+
+隧道集合。
+
+创建隧道时如果不输入名字可以自动生成一个。
+
+一个路由器只能绑定一个二层隧道且二三层隧道不能共存于一个路由器。
+
+tunnel_connections 和 target_networks 将包含其结构的完整信息。
+
+### List all Tunnels [GET]
++ Request (application/json)
++ Response 200 (application/json)
+
+        [{
+            "id": 11, "name": "Tunnel1", "type"： 2， "mode": "gre",
+            “created_at”: "2015-01-28T07:53:08.967323",
+            "tenant_id": "21", "status": "ACTIVE",
+            "admin_state_up": true, "router_id": "31",
+            "local_subnet": "41",
+            "tunnel_connections": [{
+                "id": 52, "remote_ip": "8.8.6.6"
+                "tenant_id": "21", "tunnel_id": "12",
+                "key": "", "key_type": 0,
+                "checksum": 3
+              },{
+                "id": 51, "remote_ip": "8.8.4.4"
+                "tenant_id": "21", "tunnel_id": "11",
+                "key": "654321", "key_type": 1,
+                "checksum": 1
+              }],
+            "target_networks": [],
+            "local_ip": "1.2.3.4"
+        }, {
+            "id": 12, "name": "Tunnel2", "type"： 3， "mode": "gre",
+            “created_at”: "2015-01-28T07:53:08.967323",
+            "tenant_id": "21", "status": "ACTIVE",
+            "admin_state_up": true, "router_id": "32",
+            "local_subnet": "",
+            "tunnel_connections": [{
+                "id": 53, "remote_ip": "8.8.8.8"
+                "tenant_id": "21", "tunnel_id": "12",
+                "key": "123456", "key_type": 3,
+                "checksum": 0
+                }],
+            "target_networks": [{
+                "id": 61, "network_cidr": "192.168.1.0/24"
+                "tenant_id": "21", "tunnel_id": "12",
+              }, {
+                "id": 62, "network_cidr": "192.168.2.0/24"
+                "tenant_id": "21", "tunnel_id": "12",
+            }],
+            "local_ip": "2.1.4.3"
+        }]
+
+### Create a Layer 3 Tunnel [POST]
+
++ Parameters
+    + name (optional, string, `Tunnel2`) ... 隧道自定义名字
+    + router_id (required, UUID, `32`) ... 隧道绑定的路由器
+    + type (required, integer, `2`) ... 隧道类型，应为 2 或 3
+    + mode (required, string, `gre`) ... 隧道模式，目前只支持 GRE
+    
+
++ Request (application/json)
+
+        {
+            "name": "Tunnel2", "type"： 3,
+            "router_id": "32", "mode": "gre"
+        }
+
++ Response 201 (application/json)
+
+        {
+            "id": 12, "name": "Tunnel2", "type"： 3， "mode": "gre",
+            “created_at”: "2015-01-28T07:53:08.967323",
+            "tenant_id": "21", "status": "DOWN",
+            "admin_state_up": true, "router_id": "32",
+            "local_subnet": "",
+            "tunnel_connections": [],
+            "target_networks": []
+        }
+        
++ Response 400 (application/json)
+        
+        输入数据不合法，例如 type 不是 2 或 3
+
++ Response 409 (application/json)
+        
+        冲突，可能是该路由器上已经有了一个二层隧道
+
+### Create a Layer 2 Tunnel [POST]
+
++ Parameters
+    + name (optional, string, `Tunnel2`) ... 隧道自定义名字
+    + router_id (required, UUID, `32`) ... 隧道绑定的路由器
+    + local_subnet (required, UUID, `41`) ... 隧道绑定的本地子网
+    + type (required, integer, `2`) ... 隧道类型，应为 2 或 3
+    + mode (required, string, `gre`) ... 隧道模式，目前只支持 GRE
+
++ Request (application/json)
+
+        {
+            "name": "Tunnel2", "type"： 2,
+            "router_id": "31",
+            "local_subnet": "41"
+        }
+
++ Response 201 (application/json)
+
+        {
+            "id": 11, "name": "Tunnel1", "type"： 2， "mode": "gre",
+            “created_at”: "2015-01-28T07:53:08.967323",
+            "tenant_id": "21", "status": "DOWN",
+            "admin_state_up": true, "router_id": "32",
+            "local_subnet": "41",
+            "tunnel_connections": [],
+            "target_networks": []
+        }
+        
++ Response 400 (application/json)
+        
+        输入数据不合法，例如 type 不是 2 或 3
+
++ Response 409 (application/json)
+        
+        冲突，可能是该路由器上已经有了一个二层或三层隧道
+
+## Tunnel [/tunnel/{id}]
+
+单个隧道，只有 name 和 admin_state_up（隧道管理状态）允许修改
+
++ Parameters
+    + id (required, UUID, `12`) ... 隧道ID
+    
+
+### Retrieve a Tunnel [GET]
++ Request (application/json)
++ Response 200 (application/json)
+
+        {
+            "id": 12, "name": "Tunnel2", "type"： 3， "mode": "gre",
+            “created_at”: "2015-01-28T07:53:08.967323",
+            "tenant_id": "21", "status": "ACTIVE",
+            "admin_state_up": true, "router_id": "32",
+            "local_subnet": "",
+            "tunnel_connections": [{
+                "id": 53, "remote_ip": "8.8.8.8"
+                "tenant_id": "21", "tunnel_id": "12",
+                "key": "123456", "key_type": 3,
+                "checksum": 0}],
+            "target_networks": [{
+                "id": 61, "network_cidr": "192.168.1.0/24"
+                "tenant_id": "21", "tunnel_id": "12",
+              }, {
+                "id": 62, "network_cidr": "192.168.2.0/24"
+                "tenant_id": "21", "tunnel_id": "12",
+            }],
+            "local_ip": "2.1.4.3"
+        }
+
++ Response 404 (application/json)
+
+        指定 Tunnel 不存在
+    
+    
+### Modify a Tunnel [PUT]
++ Request (application/json)
+
+        {
+          "name": "Tunnel2",  "admin_state_up": true
+        }
+
++ Response 200 (application/json)
+
+        {
+            "id": 12, "name": "Tunnel2", "type"： 3， "mode": "gre",
+            “created_at”: "2015-01-28T07:53:08.967323",
+            "tenant_id": "21", "status": "ACTIVE",
+            "admin_state_up": true, "router_id": "32",
+            "local_subnet": "",
+            "tunnel_connections": [{
+                "id": 53, "remote_ip": "8.8.8.8"
+                "tenant_id": "21", "tunnel_id": "12",
+                "key": "123456", "key_type": 3,
+                "checksum": 0}],
+            "target_networks": [{
+                "id": 61, "network_cidr": "192.168.1.0/24"
+                "tenant_id": "21", "tunnel_id": "12",
+              }, {
+                "id": 62, "network_cidr": "192.168.2.0/24"
+                "tenant_id": "21", "tunnel_id": "12",
+            }]
+        }
+        
++ Response 404 (application/json)
+
+        指定 Tunnel 不存在
+        
+
+### Remove a Tunnel [DELETE]
++ Response 204 (application/json)
++ Response 404 (application/json)
+
+        指定 Tunnel 不存在
+
+
+
+# Group Tunnel Connections
+
+隧道连接相关的 API。
+
+关于密钥类型，0 表示无密钥，1 表示只填充密钥，2 表示只验证密钥，3 表示双向（既计算密钥也验证密钥）。
+
+关于校验码，0 表示无校验码，1 表示只填充校验码，2 表示只验证校验码，3 表示双向（既填充校验码也验证校验码）。
+
+## Tunnel Connections [/tunnel-connections]
+### List all Tunnel Connections [GET]
++ Request (application/json)
++ Response 200 (application/json)
+
+        [{
+            "id": 53, "remote_ip": "8.8.8.8"
+            "tenant_id": "21", "tunnel_id": "12",
+            "key": "123456", "key_type": 3,
+            "checksum": 0
+        }, {
+            "id": 52, "remote_ip": "8.8.6.6"
+            "tenant_id": "21", "tunnel_id": "12",
+            "key": "", "key_type": 0,
+            "checksum": 3
+        }, {
+            "id": 51, "remote_ip": "8.8.4.4"
+            "tenant_id": "21", "tunnel_id": "11",
+            "key": "654321", "key_type": 1,
+            "checksum": 1
+        }]
+
+### Create a Tunnel Connection [POST]
+
++ Parameters
+    + remote_ip (required, UUID, `8.8.4.4`) ... 远端 IP
+    + tunnel_id (required, UUID, `11`) ... 隧道连接绑定的隧道
+    + key (optional, string, `654321`) ... 密钥
+    + key_type (required, integer, `1`) ... 密钥类型
+    + checksum (required, integer, `1`) ... 校验码类型
+
++ Request (application/json)
+
+        {
+            "remote_ip": "8.8.4.4",
+            "tunnel_id": "11",
+            "key": "654321", "key_type": 1,
+            "checksum": 1
+        }
+
++ Response 201 (application/json)
+
+        {
+            "id": 51, "remote_ip": "8.8.4.4"
+            "tenant_id": "21", "tunnel_id": "11",
+            "key": "654321", "key_type": 1,
+            "checksum": 1
+        }
+
++ Response 400 (application/json)
+        
+        输入数据不合法，例如密码应当为 0~2^32 整数，或者一个合法的 IPv4 地址，密钥、校验码类型应当为 0~3，或密码值（空）与密码类型（非 0）不相符。
+
++ Response 409 (application/json)
+        
+        创建的隧道连接绑定的隧道为 3 层且该隧道已绑定隧道连接，或创建的隧道为 2 层但该隧道绑定连接超过限制。
+
+## Tunnel Connection [/tunnel-connection/{id}]
+
+单个隧道连接
+
++ Parameters
+    + id (required, UUID, `51`) ... 隧道连接ID
+    
+
+### Retrieve a Tunnel Connection [GET]
++ Request (application/json)
++ Response 200 (application/json)
+
+        {
+            "id": 51, "remote_ip": "8.8.4.4"
+            "tenant_id": "21", "tunnel_id": "11",
+            "key": "654321", "key_type": 1,
+            "checksum": 1
+        }
+
++ Response 404 (application/json)
+
+        指定 Tunnel Connection 不存在
+        
+### Remove a Tunnel Connection [DELETE]
++ Response 204 (application/json)
++ Response 404 (application/json)
+
+        指定 Tunnel Connection 不存在
+        
+        
+# Group Target Networks
+
+目标网络相关的 API。
+
+## Target Networks [/target-networks]
+### List all Target Networks [GET]
++ Request (application/json)
++ Response 200 (application/json)
+
+        [{
+            "id": 61, "network_cidr": "192.168.1.0/24"
+            "tenant_id": "21", "tunnel_id": "12",
+        }, {
+            "id": 62, "network_cidr": "192.168.2.0/24"
+            "tenant_id": "21", "tunnel_id": "12",
+        }]
+
+### Create a Target Network [POST]
+
++ Parameters
+    + tunnel_id (required, UUID, `11`) ... 隧道连接绑定的隧道
+    + network_cidr (required, string, `192.168.1.0/24`) ... 目标网络的CIDR网络地址
+
++ Request (application/json)
+
+        {
+            "network_cidr": "192.168.1.0/24"
+            "tunnel_id": "12",
+        }
+
++ Response 201 (application/json)
+
+        {
+            "id": 61, "network_cidr": "192.168.1.0/24"
+            "tenant_id": "21", "tunnel_id": "12",
+        }
+
++ Response 400 (application/json)
+        
+        输入数据不合法，例如网络地址应为 192.168.1.0/24 而非 192.168.1.1/24。
+
++ Response 409 (application/json)
+        
+        创建的目标网络绑定的隧道为 2 层隧道，或该隧道绑定的目标网络超过限制。
+
+## Target Network [/target-network/{id}]
+
+单个目标网络
+
++ Parameters
+    + id (required, UUID, `61`) ... 目标网络ID
+    
+
+### Retrieve a Target Network [GET]
++ Request (application/json)
++ Response 200 (application/json)
+
+        {
+            "id": 61, "network_cidr": "192.168.1.0/24"
+            "tenant_id": "21", "tunnel_id": "12",
+        }
+
++ Response 404 (application/json)
+
+        指定目标网络不存在
+        
+### Remove a Target Network [DELETE]
++ Response 204 (application/json)
++ Response 404 (application/json)
+
+        指定目标网络不存在
