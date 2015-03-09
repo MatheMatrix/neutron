@@ -21,7 +21,7 @@ GRE 隧道服务有三个核心资源：
 
 隧道相关的 API
 
-## Tunnels [/tunnels]
+## Tunnels [/tunnel/tunnels]
 
 隧道集合。
 
@@ -149,7 +149,7 @@ tunnel_connections 和 target_networks 将包含其结构的完整信息。
         
         冲突，可能是该路由器上已经有了一个二层或三层隧道
 
-## Tunnel [/tunnel/{id}]
+## Tunnel [/tunnel/tunnels/{id}]
 
 单个隧道，只有 name 和 admin_state_up（隧道管理状态）允许修改
 
@@ -237,7 +237,7 @@ tunnel_connections 和 target_networks 将包含其结构的完整信息。
 
 关于校验码，0 表示无校验码，1 表示只填充校验码，2 表示只验证校验码，3 表示双向（既填充校验码也验证校验码）。
 
-## Tunnel Connections [/tunnel-connections]
+## Tunnel Connections [/tunnel/tunnel-connections]
 ### List all Tunnel Connections [GET]
 + Request (application/json)
 + Response 200 (application/json)
@@ -294,7 +294,7 @@ tunnel_connections 和 target_networks 将包含其结构的完整信息。
         
         创建的隧道连接绑定的隧道为 3 层且该隧道已绑定隧道连接，或创建的隧道为 2 层但该隧道绑定连接超过限制。
 
-## Tunnel Connection [/tunnel-connection/{id}]
+## Tunnel Connection [/tunnel/tunnel-connection/{id}]
 
 单个隧道连接
 
@@ -328,7 +328,7 @@ tunnel_connections 和 target_networks 将包含其结构的完整信息。
 
 目标网络相关的 API。
 
-## Target Networks [/target-networks]
+## Target Networks [/tunnel/target-networks]
 ### List all Target Networks [GET]
 + Request (application/json)
 + Response 200 (application/json)
@@ -369,7 +369,7 @@ tunnel_connections 和 target_networks 将包含其结构的完整信息。
         
         创建的目标网络绑定的隧道为 2 层隧道，或该隧道绑定的目标网络超过限制。
 
-## Target Network [/target-network/{id}]
+## Target Network [/tunnel/target-network/{id}]
 
 单个目标网络
 
@@ -394,4 +394,4 @@ tunnel_connections 和 target_networks 将包含其结构的完整信息。
 + Response 204 (application/json)
 + Response 404 (application/json)
 
-        指定目标网络不存在
+        指定目标网不存在
