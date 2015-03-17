@@ -232,6 +232,17 @@ tunnel_connections 和 target_networks 将包含其结构的完整信息。
 
 
 
+## UOS Private Tunnel API [/uos_resources/{id}/remove_tunnel]
+
+### Remove a Tunnel forcely [PUT]
+
++ Parameters
+    + id (required, UUID, `61`) ... 目标隧道ID
+    
++ Response 200 (application/json)
+
+
+
 # Group Tunnel Connections
 
 隧道连接相关的 API。
@@ -297,7 +308,7 @@ tunnel_connections 和 target_networks 将包含其结构的完整信息。
         
         创建的隧道连接绑定的隧道为 3 层且该隧道已绑定隧道连接，或创建的隧道为 2 层但该隧道绑定连接超过限制。
 
-## Tunnel Connection [/tunnel/tunnel-connection/{id}]
+## Tunnel Connection [/tunnel/tunnel-connections/{id}]
 
 单个隧道连接
 
@@ -372,7 +383,7 @@ tunnel_connections 和 target_networks 将包含其结构的完整信息。
         
         创建的目标网络绑定的隧道为 2 层隧道，或该隧道绑定的目标网络超过限制。
 
-## Target Network [/tunnel/target-network/{id}]
+## Target Network [/tunnel/target-networks/{id}]
 
 单个目标网络
 
@@ -397,4 +408,4 @@ tunnel_connections 和 target_networks 将包含其结构的完整信息。
 + Response 204 (application/json)
 + Response 404 (application/json)
 
-        指定目标网不���在
+        指定目标网不������
