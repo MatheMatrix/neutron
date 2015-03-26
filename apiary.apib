@@ -247,7 +247,9 @@ tunnel_connections 和 target_networks 将包含其结构的完整信息。
 ### Add a tunnel and tunnel connection in one transaction[POST]
 
 + Parameters
-    + id (required, UUID, `61`) ... 目标隧道ID
+    + router_id (required, UUID, `32`) ... 隧道绑定的路由器
+    + type (required, integer, `2`) ... 隧道类型，应为 2 或 3
+    + mode (required, string, `gre`) ... 隧道模式，目前只支持 GRE
     + remote_ip (required, UUID, `8.8.4.4`) ... 远端 IP
     + key (optional, string, `654321`) ... 密钥
     + key_type (required, integer, `1`) ... 密钥类型
@@ -447,4 +449,4 @@ tunnel_connections 和 target_networks 将包含其结构的完整信息。
 + Response 204 (application/json)
 + Response 404 (application/json)
 
-        指定目标网不��������
+        指定目标网不����������
