@@ -242,6 +242,45 @@ tunnel_connections 和 target_networks 将包含其结构的完整信息。
 + Response 200 (application/json)
 
 
+## UOS Private Tunnel Create API [/uos_resources/add_tunnel_and_connection]
+
+### Add a tunnel and tunnel connection in one transaction[POST]
+
++ Parameters
+    + id (required, UUID, `61`) ... 目标隧道ID
+    + remote_ip (required, UUID, `8.8.4.4`) ... 远端 IP
+    + key (optional, string, `654321`) ... 密钥
+    + key_type (required, integer, `1`) ... 密钥类型
+    + checksum (required, integer, `1`) ... 校验码类型
+
++ Request (application/json)
+
+        {
+            "tunnel": 
+                {
+                    "type":3, "mode":"gre", 
+                    "router_id":"08c0c127-3592-4d87-b947-dc4ceffe8657"
+                }, 
+            "tunnel_connection": 
+                {
+                    "key_type":0, "checksum":0, "remote_ip":"1.1.1.1"
+                }
+        }
+
++ Response 201 (application/json)
+
+        {
+            "tunnel_connection": 
+                {
+                    "name": "tun_conn_9fc6b82c", 
+                    "tenant_id": "4f47213aea354c9b9eba511b4184c013", 
+                    "tunnel_id": "d1cde13a-6f88-4412-9d26-375d8ba43b51", 
+                    "key_type": 0, "key": "", 
+                    "id": "9fc6b82c-939a-4a8a-a338-ddcbfc0498ef", 
+                    "remote_ip": "1.1.1.1"
+                }
+        }
+
 
 # Group Tunnel Connections
 
@@ -408,4 +447,4 @@ tunnel_connections 和 target_networks 将包含其结构的完整信息。
 + Response 204 (application/json)
 + Response 404 (application/json)
 
-        指定目标网不������
+        指定目标网不��������
